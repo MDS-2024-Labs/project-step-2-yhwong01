@@ -47,7 +47,7 @@ class TestReportGeneration(unittest.TestCase):
         """Test generate_summary for a specific user."""
         # Generate summary for Alice
         summary = self.report_generator.generate_summary("Alice")
-        
+
         # Assertions
         self.assertIn("Expense Report for Alice", summary)
         self.assertIn("Payer: Alice, Amount: $30.00", summary)
@@ -62,15 +62,15 @@ class TestReportGeneration(unittest.TestCase):
         self.report_generator.generate_summary = MagicMock(
             return_value="""
             ### Expense Report for Alice (Generated on 2024-12-10 12:00:00):
-            
+
             **Expense History:**
             - Payer: Alice, Amount: $30.00, Participants: Alice,Bob,Charlie
             - Payer: Alice, Amount: $50.00, Participants: Alice,Bob
-            
+
             **Debt Situation:**
             - You owe Bob: $10.00
             - Charlie owes you: $15.00
-            
+
             **Summary:**
             - Total Amount You Owe: $10.00
             - Total Amount Owed to You: $15.00
@@ -79,21 +79,22 @@ class TestReportGeneration(unittest.TestCase):
 
         # Test exporting as TXT
         self.report_generator.export_report("Alice", file_format="txt")
-        txt_files = glob.glob("Alice_expense_report_20241210*.txt")
+        txt_files = glob.glob("Alice_expense_report_*.txt")
         self.assertTrue(len(txt_files) > 0, "TXT file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in txt_files), "TXT file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in txt_files), "TXT file does not match expected format.")
 
         # Test exporting as CSV
         self.report_generator.export_report("Alice", file_format="csv")
-        csv_files = glob.glob("Alice_expense_report_20241210*.csv")
+        csv_files = glob.glob("Alice_expense_report_*.csv")
         self.assertTrue(len(csv_files) > 0, "CSV file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in csv_files), "CSV file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in csv_files), "CSV file does not match expected format.")
 
         # Test exporting as XLSX
         self.report_generator.export_report("Alice", file_format="xlsx")
-        xlsx_files = glob.glob("Alice_expense_report_20241210*.xlsx")
+        xlsx_files = glob.glob("Alice_expense_report_*.xlsx")
         self.assertTrue(len(xlsx_files) > 0, "XLSX file not generated.")
-        self.assertTrue(any("Alice_expense_report_20241210" in f for f in xlsx_files), "XLSX file does not match expected format.")
+        self.assertTrue(any("Alice_expense_report" in f for f in xlsx_files),
+                        "XLSX file does not match expected format.")
 
         # Test invalid file format
         with self.assertRaises(ValueError):
@@ -204,16 +205,17 @@ class TestReportGeneration(unittest.TestCase):
         # Test that Alice has valid debt entries
         total_debt_alice = sum(d[2] for d in alice_debts)  # Sum up debt amounts
         assert total_debt_alice >= 0, "Debt balances must be valid numbers."
-        
+
         # Test to ensure that the debt amounts are positive
         assert all(d[2] > 0 for d in alice_debts), "All Alice's debt amounts should be greater than 0."
 
         # Test duplicates
-        unique_debts = {(d[0], d[1], d[2]) for d in debts} 
+        unique_debts = {(d[0], d[1], d[2]) for d in debts}
         assert len(unique_debts) == len(debts), "Debt entries should not have duplicates for Alice."
-        
+
         # Test if debts are fetched as a valid list from the database
         assert isinstance(debts, list), "Debts should be retrieved as a list from the database."
+
 
 if __name__ == "__main__":
     unittest.main()
